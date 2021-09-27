@@ -70,6 +70,9 @@ class Card:
         self.color = col
         self.game = game
 
+    def __eq__(self, card):
+        return self.color == card.color and self.number == card.number
+
     def __le__(self, card):
         return not self.__gt__(card)
 
@@ -113,6 +116,30 @@ class Card:
     def can_forward(self, card):
         return card.number == self.number
 
+    @staticmethod
+    def fromstring(string: str, game=None):
+        rawc, rawn = string.strip().split()
+        rawc, rawn = rawc.lower(), rawn.lower()
+        cdict = {Color.HEARTS: ["hearts", "heart", "чирвы", "сердце", "чирва"], Color.DIAMONDS: ["diamond", "diamonds", "бубна"], Color.SPADES: ["spades", "spade", "пики", "пика"], Color.CLUBS: ["clubs", "club", "трефа", "крест"]}
+        ndict = {"2": Number.TWO, "3": Number.THREE, "4": Number.FOUR, "5": Number.FIVE, "6": Number.SIX, "7": Number.SEVEN, "8": Number.EIGHT, "9": Number.NINE, "10": Number.TEN,
+                 "j": Number.JACK, "jack": Number.JACK, "в": Number.JACK, "валет": Number.JACK, "валентин": Number.JACK,
+                 "q": Number.QUEEN, "queen": Number.QUEEN, "д": Number.QUEEN, "дама": Number.QUEEN, "дима": Number.QUEEN,
+                 "k": Number.KING, "king": Number.KING, "к": Number.KING, "король": Number.KING, "кирилл": Number.KING,
+                 "a": Number.ACE, "ace": Number.ACE, "т": Number.ACE, "туз": Number.ACE, "тузик": Number.ACE}
+        recc = None
+        for k,v in cdict.items():
+            for d in v:
+                if rawc == d:
+                    recc = k; break
+            if recc: break
+        else:
+            raise ValueError("Invalid color '%s'" % rawc)
+
+        if rawn in ndict: rnum = ndict[rawn]
+        else: raise ValueError("Invalid number '%s'" % rawn)
+
+        return Card(recc, rnum, game)
+
 class AI:
     @staticmethod
     def move(deck: list[Card]) -> Card:
@@ -132,6 +159,8 @@ class UnfairAI(AI):
 class Game:
     def __init__(self, players: list[str], settings: Settings = None):
         if len(players) < 2: raise ValueError("Not enough players (should be 2 or more)")
+        _set = set(players)
+        if(len(_set) != len(players)): raise ValueError("Duplicate names found in player list!")
         self.moving = players[0]
         self.cool = None
         if settings is None:
@@ -146,7 +175,7 @@ class Game:
         return self.decks[playername]
 
     def give_out_cards(self):
-        self.deck = self.gen_full_deck(self.settings.get(Setting.CARDS))
+        self.deck = self.gen_full_deck()
         for player in self.decks:
             for i in range(6):
                 self.decks[player].append(self.take_card())
@@ -156,12 +185,13 @@ class Game:
         if len(self.deck) <= 0: return None
         return self.deck.pop(0)
 
-    def gen_full_deck(self, amount: CardAmount):
+    def gen_full_deck(self):
+        amount = self.settings.get(Setting.CARDS)
         deck = []
         numbs = []
         for x in [Number.ACE, Number.KING, Number.QUEEN, Number.JACK, Number.TEN, Number.NINE]:
             numbs.append(x)
-        if amount == CardAmount.NORMAL:
+        if amount != CardAmount.SMALL:
             for x in [Number.EIGHT, Number.SEVEN, Number.SIX]: numbs.append(x)
         if amount == CardAmount.LARGE:
             for x in [Number.FIVE, Number.FOUR, Number.THREE, Number.TWO]: numbs.append(x)

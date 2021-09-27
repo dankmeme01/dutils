@@ -7,6 +7,7 @@ from socket import socket
 from pathlib import Path
 from typing import Any, Union
 from pynput import mouse, keyboard
+from enums import Enum, auto
 import json
 import os
 import time
@@ -303,8 +304,10 @@ class Config:
 
 class DiscordManager:
     # TODO
-    def mute(state: bool): ...
-    def deafen(state: bool): ...
+    def __init__(self, token: str):
+        self.token = token
+    def mute(self, state: bool): ...
+    def deafen(self, state: bool): ...
 
 class MouseManager(mouse.Controller):
     def __init__(self):
@@ -316,3 +319,41 @@ class MouseManager(mouse.Controller):
 class KeyboardManager(keyboard.Controller):
     def __init__(self):
         super().__init__()
+
+class ScannerCodes(Enum):
+    REPEAT = auto()
+    EXIT = auto()
+    CASE_SENSITIVE = auto()
+    CASE_IGNORE = auto()
+    SCAN_END = auto()
+
+class Scanner:
+    def __init__(self, pairs, inpfunc = input):
+        # example of pairs:
+        # [ ("Enter choice: 1 or 2", ScannerCodes.CASE_IGNORE, ScannerCodes.REPEAT, ("1", 1), ("2", 2)) ]
+        if len(pairs) < 1: raise ValueError("Scanner should have at least one question.")
+        self.pairs = iter(pairs)
+        self.input = inpfunc
+
+    def scan(self, supplypair = None):
+        try:
+            if supplypair is None: pair = next(self.pairs)
+            else: pair = supplypair
+            question, case, default, *answers = pair
+            ans = self.input(question).strip()
+            if case == ScannerCodes.CASE_IGNORE: ans = ans.lower()
+
+            for k,v in answers:
+                if case == ScannerCodes.CASE_IGNORE: k = k.lower()
+                if ans == k: return v
+            else:
+                if default == ScannerCodes.REPEAT:
+                    print("Invalid answer, please try again.")
+                    return self.scan(pair)
+                if default == ScannerCodes.EXIT:
+                    return exit(1)
+                else:
+                    return default
+
+        except StopIteration:
+            return ScannerCodes.SCAN_END

@@ -1,6 +1,8 @@
 import math
 from fractions import Fraction
-from pyutils import whole, beautify, overload
+from . import pyutils
+
+whole, beautify, overload = pyutils.whole, pyutils.beautify, pyutils.overload
 
 def frac(num: float, sameiflong: bool = True):
     if len(str(Fraction(num))) > 6 and sameiflong: return beautify(num)

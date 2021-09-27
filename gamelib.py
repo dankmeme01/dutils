@@ -30,7 +30,7 @@ on_error - (manager, player, data, ex)
 on_shutdown - (manager)
 raw_data - (manager, player, data)
 """
-import event as evt
+from . import event as evt
 import selectors
 import socket
 import types
