@@ -1,13 +1,3 @@
-#/\/\/\/\/\/\/\
-r'r'  r'r'   #| Made and signed by dank_meme#0210 on discord.
-b'b'   b'b'  #| Free software. Editing is highly unrecommended.
-f'f'    f'f' #|
-u'u'     u'u'#|
-f'f'    f'f' #|
-b'b'   b'b'  #| Don't touch this code unless you know what you are doing.
-r'r'  r'r'   #| Will be better for you...
-#\/\/\/\/\/\/\/
-
 import socket
 import os
 import random
