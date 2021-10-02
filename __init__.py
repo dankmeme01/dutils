@@ -7,4 +7,3 @@ __author__ = "dank_meme#0210"
 
 def init_pgutils():
     from . import pgutils
-    return pgutils
