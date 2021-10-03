@@ -1,4 +1,4 @@
-from enums import Enum, auto
+from enum import Enum, auto
 from itertools import product
 from random import shuffle
 from time import sleep
