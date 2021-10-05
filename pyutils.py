@@ -209,6 +209,9 @@ def get_ip():
     import socket, requests
     return [socket.gethostbyname(socket.gethostname()), requests.get('https://api.ipify.org').text]
 
+def censor(string: str, char: str = '*'):
+    return ''.join([char for _ in range(len(string))])
+
 class Logger:
     def __init__(self, console : bool, file : Union[bool, str], timestamp : Union[bool, str] ="$day.$month.$year $hour:$minute:$second.$ms", sock: socket = None):
         self.console = console
