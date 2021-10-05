@@ -1,5 +1,5 @@
 import pygame
-import pyutils
+from . import pyutils
 from itertools import product
 from pygame.constants import K_BACKSPACE, K_DELETE, MOUSEBUTTONDOWN
 from pygame.locals import K_LEFT, K_RIGHT, K_ESCAPE, KEYDOWN, QUIT, K_SPACE, KEYUP

@@ -7,7 +7,7 @@ from socket import socket
 from pathlib import Path
 from typing import Any, Union
 from pynput import mouse, keyboard
-from enums import Enum, auto
+from enum import Enum, auto
 import json
 import os
 import time
