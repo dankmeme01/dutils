@@ -1,5 +1,6 @@
 import pygame
 import pyutils
+from enum import Enum, auto
 from itertools import product
 from pygame.constants import K_BACKSPACE, K_DELETE, MOUSEBUTTONDOWN
 from pygame.locals import K_LEFT, K_RIGHT, K_ESCAPE, KEYDOWN, QUIT, K_SPACE, KEYUP
@@ -330,6 +331,20 @@ class Slider:
 		filled = pygame.Surface((int(self.dims[0]*fillperc), self.dims[1]))
 		filled.fill(self.colors[1])
 		surface.blit(filled, (int(center[0]-self.dims[0]/2), center[1]-self.dims[1]/2))
+
+class PlayerInput:
+	def __init__(self):
+		self.pressed = None
+
+	def tick(self):
+		self.pressed = pygame.key.get_pressed()
+
+	def down(self, *k):
+		press = False
+		for k_ in k:
+			if self.pressed[k_]: press = True; break
+		return press
+
 
 if __name__ == '__main__':
 	man = FontManager("times", True)
