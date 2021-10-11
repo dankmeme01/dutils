@@ -1,5 +1,5 @@
 import pygame
-import pyutils
+from . import pyutils
 from enum import Enum, auto
 from itertools import product
 from pygame.constants import K_BACKSPACE, K_DELETE, MOUSEBUTTONDOWN
