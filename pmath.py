@@ -7,6 +7,14 @@ except Exception:
 finally:
     whole, beautify, overload = pyutils.whole, pyutils.beautify, pyutils.overload
 
+def sin(deg: float): return math.sin(math.radians(deg))
+def cos(deg: float): return math.cos(math.radians(deg))
+def tan(deg: float): return math.tan(math.radians(deg))
+def ctan(deg: float): return 1 / tan(deg)
+def asin(deg: float): return math.asin(math.radians(deg))
+def acos(deg: float): return math.acos(math.radians(deg))
+def atan(deg: float): return math.atan(math.radians(deg))
+
 def frac(num: float, sameiflong: bool = True):
     if len(str(Fraction(num))) > 6 and sameiflong: return beautify(num)
     return str(Fraction(num))
@@ -164,7 +172,7 @@ def area_rhomb(side: float, angle: int):
 @overload
 def area_rhomb(side: float, angle_sin: float):
     return side**2 * angle_sin
-    
+
 
 def resolvemath(mathstring: str) -> None:
     whatdo = None

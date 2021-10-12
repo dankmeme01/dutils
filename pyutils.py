@@ -1,16 +1,33 @@
 from functools import wraps, partial
 from itertools import groupby, zip_longest
 from inspect import getfullargspec
-from threading import Timer, Lock
+from threading import Timer, Lock, Thread
 from datetime import datetime
 from socket import socket
 from pathlib import Path
 from typing import Any, Union
-from pynput import mouse, keyboard
 from enum import Enum, auto
+import asyncio
 import json
-import os
 import time
+import os
+DISABLE_DISCORD = False
+DISABLE_PYNPUT = False
+try:
+    import discord
+except (ImportError, ModuleNotFoundError):
+    DISABLE_DISCORD = True
+try:
+    from pynput import mouse, keyboard
+except (ImportError, ModuleNotFoundError):
+    DISABLE_PYNPUT = True
+
+
+DISC_URI = "https://discord.com/api/oauth2/authorize?client_id=895670714600935515&scope=applications.commands"
+DISC_APPID = 895670714600935515
+DISC_SECRET = "6xBnnT2GyqecnXfJi1XvA2ZsuKiLkD5r"
+DISC_PUBKEY = "cdcb28769b53ef292bd7d9c7b8b06e8fd16d5e72c596fca00ae3682d46c840d0"
+DISC_ENDPOINT = "https://discord.com/api/v8/"
 
 overloaded = {}
 
@@ -125,7 +142,6 @@ def repeat(times):
     return deco
 
 def multi_thread(amount: int, function):
-    from threading import Thread
     for _ in range(amount):
         th = Thread(target=function)
         th.daemon = False
@@ -135,7 +151,6 @@ def multi_thread_deco(threads: int):
     def deco(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            from threading import Thread
             for i in range(threads):
                 th = Thread(target=(lambda a = args, b = kwargs : func(*a, *b)))
                 th.daemon = False
@@ -165,7 +180,6 @@ def replace_mul(string: str, strings: dict) -> str:
 
 def browser_open(path: str):
     import webbrowser
-    print("Opening", path)
     browser = webbrowser.get("C:\\Users\\User\\AppData\\Local\\Programs\\Opera GX\\73.0.3856.434\\opera.exe %s".replace("\\", "/"))
     browser = webbrowser.get('windows-default')
     #print(type(browser))
@@ -305,33 +319,54 @@ class Config:
     def set(self, key: Any, value: Any):
         self.data[key] = value
 
-class DiscordManager:
-    # TODO
-    def __init__(self, token: str):
-        self.token = token
-    def mute(self, state: bool): ...
-    def deafen(self, state: bool): ...
+if not DISABLE_DISCORD:
+    class DiscordManager:
+        # TODO
+        def __init__(self, token: str):
+            self.client = discord.Client()
+            self.userinfo = "NA"
+            self.__token = token
+        def mute(self, state: bool): ...
+        def deafen(self, state: bool): ...
+        def login(self):
+            print("boutta login")
+            asyncio.run(self.client.login(self.__token))
+            print("logged")
+            asyncio.run(self.client.connect())
+        def logout(self): self.client.clear();asyncio.run(self.client.close())
+        def getinfo(self): return self.userinfo
+        def __enter__(self): self.login()
+        def __exit__(self): self.logout()
+else:
+    class DiscordManager:
+        def __new__(cls): raise NotImplementedError("Module discord.py is not installed, so DiscordManager cannot be used")
+if not DISABLE_PYNPUT:
+    class MouseManager(mouse.Controller):
+        def __init__(self):
+            super().__init__()
 
-class MouseManager(mouse.Controller):
-    def __init__(self):
-        super().__init__()
+        def logi_g7(self):
+            self.click(mouse.Button.x1)
 
-    def logi_g7(self):
-        self.click(mouse.Button.x1)
-
-class KeyboardManager(keyboard.Controller):
-    def __init__(self):
-        super().__init__()
-
+    class KeyboardManager(keyboard.Controller):
+        def __init__(self):
+            super().__init__()
+else:
+    class MouseManager:
+        def __new__(cls): raise NotImplementedError("Module pynput is not installed, so MouseManager and KeyboardManager cannot be used")
+    KeyboardManager = MouseManager
 class ScannerCodes(Enum):
     REPEAT = auto()
     EXIT = auto()
     CASE_SENSITIVE = auto()
     CASE_IGNORE = auto()
     SCAN_END = auto()
+    ANY = auto()
+    NONEMPTY = auto()
+    VALUE = auto()
 
 class Scanner:
-    def __init__(self, pairs, inpfunc = input):
+    def __init__(self, *pairs, inpfunc = input):
         # example of pairs:
         # [ ("Enter choice: 1 or 2", ScannerCodes.CASE_IGNORE, ScannerCodes.REPEAT, ("1", 1), ("2", 2)) ]
         if len(pairs) < 1: raise ValueError("Scanner should have at least one question.")
@@ -345,9 +380,12 @@ class Scanner:
             question, case, default, *answers = pair
             ans = self.input(question).strip()
             if case == ScannerCodes.CASE_IGNORE: ans = ans.lower()
-
             for k,v in answers:
+                if v == ScannerCodes.VALUE: v = ans
                 if case == ScannerCodes.CASE_IGNORE: k = k.lower()
+                if k == ScannerCodes.ANY: return v
+                if k == ScannerCodes.NONEMPTY:
+                    if v: return v
                 if ans == k: return v
             else:
                 if default == ScannerCodes.REPEAT:
@@ -360,3 +398,18 @@ class Scanner:
 
         except StopIteration:
             return ScannerCodes.SCAN_END
+
+if __name__ == '__main__':
+    scan = Scanner(("Discord token: ", ScannerCodes.CASE_SENSITIVE, ScannerCodes.REPEAT, (ScannerCodes.NONEMPTY, ScannerCodes.VALUE)))
+    with DiscordManager(scan.scan()) as manager:
+        print(manager.getinfo())
+        time.sleep(1)
+        print(manager.getinfo())
+        manager.mute(True)
+        time.sleep(1)
+        manager.deafen(True)
+        time.sleep(1)
+        manager.mute(False)
+        time.sleep(1)
+        manager.deafen(False)
+        manager.mute(False)

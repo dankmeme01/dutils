@@ -29,10 +29,22 @@ import sys
 from typing import NoReturn
 from cryptography.fernet import Fernet, InvalidToken
 
+class EncryptedData(bytes):
+    def __init__(self, string):
+        self._string = string
+        super().__init__()
+    def get(self):
+        return self._string
+
 class DataCryptor(Fernet):
     def __init__(self,__key=None):super().__init__(__key if __key is not None else DataCryptor.generate_key())
-    def __lshift__(self,string):return b'ENC!'+self.encrypt(string)
-    def __rshift__(self,crypted):return self.decrypt(crypted.partition(b'ENC!')[2])
+    #def __lshift__(self,string):return b'ENC!'+self.encrypt(string)
+    #def __rshift__(self,crypted):return self.decrypt(crypted.partition(b'ENC!')[2])
+    def __lshift__(self, data):
+        if isinstance(data, EncryptedData):
+            return self.decrypt(data.get().partition(b'ENC!')[2])
+        else:
+            return EncryptedData(b'ENC!' + self.encrypt(data))
 
 class Server(evt.eventmanager):
     def __init__(self, address: tuple, encryption: bool = False):
