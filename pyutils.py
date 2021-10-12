@@ -7,6 +7,8 @@ from socket import socket
 from pathlib import Path
 from typing import Any, Union
 from enum import Enum, auto
+from random import choice
+from string import ascii_letters
 import asyncio
 import json
 import time
@@ -158,10 +160,6 @@ def multi_thread_deco(threads: int):
         return wrapper
     return deco
 
-def minify(path: str) -> None:
-    if not os.path.exists(path): raise FileNotFoundError("File was not found by path %s" % path)
-    raise NotImplementedError("Not done yet.")
-
 def all_equal(iterable):
     """ Checks if all array elements are equal"""
     g = groupby(iterable)
@@ -225,6 +223,14 @@ def get_ip():
 
 def censor(string: str, char: str = '*'):
     return ''.join([char for _ in range(len(string))])
+
+def concat(lst: list):
+    return ''.join([str(x) for x in lst])
+
+def randname(length: int, extension: str = None):
+    mainname = concat([choice(ascii_letters + "1234567890_-") for _ in range(length)])
+    if extension: mainname += f".{extension}"
+    return mainname
 
 class Logger:
     def __init__(self, console : bool, file : Union[bool, str], timestamp : Union[bool, str] ="$day.$month.$year $hour:$minute:$second.$ms", sock: socket = None):
@@ -355,6 +361,7 @@ else:
     class MouseManager:
         def __new__(cls): raise NotImplementedError("Module pynput is not installed, so MouseManager and KeyboardManager cannot be used")
     KeyboardManager = MouseManager
+
 class ScannerCodes(Enum):
     REPEAT = auto()
     EXIT = auto()
@@ -398,6 +405,22 @@ class Scanner:
 
         except StopIteration:
             return ScannerCodes.SCAN_END
+
+class Pathlike(type(Path())):
+    def __init__(self, path):
+        if isinstance(path, Pathlike):
+            self._path = path
+        elif isinstance(path, Path):
+            self._path = path.resolve()
+        elif isinstance(path, str):
+            self._path = Path(path).resolve()
+        else:
+            self._path = Path(path)
+        Path.__init__(self)
+
+    @property
+    def path(self):
+        return self._path
 
 if __name__ == '__main__':
     scan = Scanner(("Discord token: ", ScannerCodes.CASE_SENSITIVE, ScannerCodes.REPEAT, (ScannerCodes.NONEMPTY, ScannerCodes.VALUE)))
