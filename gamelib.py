@@ -21,13 +21,18 @@ on_shutdown - (manager)
 raw_data - (manager, player, data)
 """
 from . import event as evt
+from .pyutils import NotInstalledError
 import selectors
 import socket
 import types
 import json
 import sys
 from typing import NoReturn
-from cryptography.fernet import Fernet, InvalidToken
+CRYPTOGRAPHY_DISABLED = False
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+except(ModuleNotFoundError, ImportError):
+    CRYPTOGRAPHY_DISABLED = True
 
 class EncryptedData(bytes):
     def __init__(self, string):
@@ -36,15 +41,20 @@ class EncryptedData(bytes):
     def get(self):
         return self._string
 
-class DataCryptor(Fernet):
-    def __init__(self,__key=None):super().__init__(__key if __key is not None else DataCryptor.generate_key())
-    #def __lshift__(self,string):return b'ENC!'+self.encrypt(string)
-    #def __rshift__(self,crypted):return self.decrypt(crypted.partition(b'ENC!')[2])
-    def __lshift__(self, data):
-        if isinstance(data, EncryptedData):
-            return self.decrypt(data.get().partition(b'ENC!')[2])
-        else:
-            return EncryptedData(b'ENC!' + self.encrypt(data))
+if not CRYPTOGRAPHY_DISABLED:
+    class DataCryptor(Fernet):
+        def __init__(self,__key=None):super().__init__(__key if __key is not None else DataCryptor.generate_key())
+        #def __lshift__(self,string):return b'ENC!'+self.encrypt(string)
+        #def __rshift__(self,crypted):return self.decrypt(crypted.partition(b'ENC!')[2])
+        def __lshift__(self, data):
+            if isinstance(data, EncryptedData):
+                return self.decrypt(data.get().partition(b'ENC!')[2])
+            else:
+                return EncryptedData(b'ENC!' + self.encrypt(data))
+else:
+    class DataCryptor:
+        def __init__(self, *a, **kw): raise NotInstalledError("cryptography", "DataCryptor")
+        def generate_key(*a, **kw): raise NotInstalledError("cryptography", "DataCryptor")
 
 class Server(evt.eventmanager):
     def __init__(self, address: tuple, encryption: bool = False):

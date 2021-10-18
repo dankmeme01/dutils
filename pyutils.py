@@ -13,93 +13,8 @@ import asyncio
 import json
 import time
 import os
-DISABLE_DISCORD = False
-DISABLE_PYNPUT = False
-try:
-    import discord
-except (ImportError, ModuleNotFoundError):
-    DISABLE_DISCORD = True
-try:
-    from pynput import mouse, keyboard
-except (ImportError, ModuleNotFoundError):
-    DISABLE_PYNPUT = True
-
-
-DISC_URI = "https://discord.com/api/oauth2/authorize?client_id=895670714600935515&scope=applications.commands"
-DISC_APPID = 895670714600935515
-DISC_SECRET = "6xBnnT2GyqecnXfJi1XvA2ZsuKiLkD5r"
-DISC_PUBKEY = "cdcb28769b53ef292bd7d9c7b8b06e8fd16d5e72c596fca00ae3682d46c840d0"
-DISC_ENDPOINT = "https://discord.com/api/v8/"
 
 overloaded = {}
-
-class ReusableTimer(object):
-    """
-    A reusable thread safe timer implementation
-    """
-
-    def __init__(self, interval_sec, function, *args, **kwargs):
-        """
-        Create a timer object which can be restarted
-
-        :param interval_sec: The timer interval in seconds
-        :param function: The user function timer should call once elapsed
-        :param args: The user function arguments array (optional)
-        :param kwargs: The user function named arguments (optional)
-        """
-        self._interval_sec = interval_sec
-        self._function = function
-        self._args = args
-        self._kwargs = kwargs
-        # Locking is needed since the '_timer' object might be replaced in a different thread
-        self._timer_lock = Lock()
-        self._timer = None
-
-    def start(self, restart_if_alive=True):
-        """
-        Starts the timer and returns this object [e.g. my_timer = TimerEx(10, my_func).start()]
-
-        :param restart_if_alive: 'True' to start a new timer if current one is still alive
-        :return: This timer object (i.e. self)
-        """
-        with self._timer_lock:
-            # Current timer still running
-            if self._timer is not None:
-                if not restart_if_alive:
-                    # Keep the current timer
-                    return self
-                # Cancel the current timer
-                self._timer.cancel()
-            # Create new timer
-            self._timer = Timer(self._interval_sec, self.__internal_call)
-            self._timer.start()
-        # Return this object to allow single line timer start
-        return self
-
-    def cancel(self):
-        """
-        Cancels the current timer if alive
-        """
-        with self._timer_lock:
-            if self._timer is not None:
-                self._timer.cancel()
-                self._timer = None
-
-    def is_alive(self):
-        """
-        :return: True if current timer is alive (i.e not elapsed yet)
-        """
-        with self._timer_lock:
-            if self._timer is not None:
-                return self._timer.is_alive()
-        return False
-
-    def __internal_call(self):
-        # Release timer object
-        with self._timer_lock:
-            self._timer = None
-        # Call the user defined function
-        self._function(*self._args, **self._kwargs)
 
 def colormsg(color, content, send=True):
     colord = {"blue": "\u001b[34m", "red": "\u001b[31m", "green":"\u001b[32m", "yellow": "\u001b[33m", "reset": "\u001b[0m", "black": "\u001b[30m", "wild": "\u001b[30m"}
@@ -232,6 +147,75 @@ def randname(length: int, extension: str = None):
     if extension: mainname += f".{extension}"
     return mainname
 
+
+class ReusableTimer(object):
+    """
+    A reusable thread safe timer implementation
+    """
+
+    def __init__(self, interval_sec, function, *args, **kwargs):
+        """
+        Create a timer object which can be restarted
+
+        :param interval_sec: The timer interval in seconds
+        :param function: The user function timer should call once elapsed
+        :param args: The user function arguments array (optional)
+        :param kwargs: The user function named arguments (optional)
+        """
+        self._interval_sec = interval_sec
+        self._function = function
+        self._args = args
+        self._kwargs = kwargs
+        # Locking is needed since the '_timer' object might be replaced in a different thread
+        self._timer_lock = Lock()
+        self._timer = None
+
+    def start(self, restart_if_alive=True):
+        """
+        Starts the timer and returns this object [e.g. my_timer = TimerEx(10, my_func).start()]
+
+        :param restart_if_alive: 'True' to start a new timer if current one is still alive
+        :return: This timer object (i.e. self)
+        """
+        with self._timer_lock:
+            # Current timer still running
+            if self._timer is not None:
+                if not restart_if_alive:
+                    # Keep the current timer
+                    return self
+                # Cancel the current timer
+                self._timer.cancel()
+            # Create new timer
+            self._timer = Timer(self._interval_sec, self.__internal_call)
+            self._timer.start()
+        # Return this object to allow single line timer start
+        return self
+
+    def cancel(self):
+        """
+        Cancels the current timer if alive
+        """
+        with self._timer_lock:
+            if self._timer is not None:
+                self._timer.cancel()
+                self._timer = None
+
+    def is_alive(self):
+        """
+        :return: True if current timer is alive (i.e not elapsed yet)
+        """
+        with self._timer_lock:
+            if self._timer is not None:
+                return self._timer.is_alive()
+        return False
+
+    def __internal_call(self):
+        # Release timer object
+        with self._timer_lock:
+            self._timer = None
+        # Call the user defined function
+        self._function(*self._args, **self._kwargs)
+
 class Logger:
     def __init__(self, console : bool, file : Union[bool, str], timestamp : Union[bool, str] ="$day.$month.$year $hour:$minute:$second.$ms", sock: socket = None):
         self.console = console
@@ -325,7 +309,8 @@ class Config:
     def set(self, key: Any, value: Any):
         self.data[key] = value
 
-if not DISABLE_DISCORD:
+try:
+    import discord
     class DiscordManager:
         # TODO
         def __init__(self, token: str):
@@ -343,10 +328,11 @@ if not DISABLE_DISCORD:
         def getinfo(self): return self.userinfo
         def __enter__(self): self.login()
         def __exit__(self): self.logout()
-else:
+except (ImportError, ModuleNotFoundError):
     class DiscordManager:
         def __new__(cls): raise NotImplementedError("Module discord.py is not installed, so DiscordManager cannot be used")
-if not DISABLE_PYNPUT:
+try:
+    from pynput import mouse, keyboard
     class MouseManager(mouse.Controller):
         def __init__(self):
             super().__init__()
@@ -357,7 +343,7 @@ if not DISABLE_PYNPUT:
     class KeyboardManager(keyboard.Controller):
         def __init__(self):
             super().__init__()
-else:
+except (ImportError, ModuleNotFoundError):
     class MouseManager:
         def __new__(cls): raise NotImplementedError("Module pynput is not installed, so MouseManager and KeyboardManager cannot be used")
     KeyboardManager = MouseManager
@@ -422,17 +408,7 @@ class Pathlike(type(Path())):
     def path(self):
         return self._path
 
-if __name__ == '__main__':
-    scan = Scanner(("Discord token: ", ScannerCodes.CASE_SENSITIVE, ScannerCodes.REPEAT, (ScannerCodes.NONEMPTY, ScannerCodes.VALUE)))
-    with DiscordManager(scan.scan()) as manager:
-        print(manager.getinfo())
-        time.sleep(1)
-        print(manager.getinfo())
-        manager.mute(True)
-        time.sleep(1)
-        manager.deafen(True)
-        time.sleep(1)
-        manager.mute(False)
-        time.sleep(1)
-        manager.deafen(False)
-        manager.mute(False)
+class NotInstalledError(Exception):
+    def __init__(self, module, name):
+        message = f"Cannot use name '{name}' due to module '{module}' not being installed"
+        super.__init__(message)
