@@ -7,3 +7,11 @@ __author__ = "dank_meme#0210"
 
 def init_pgutils():
     from . import pgutils
+    return pgutils
+
+def init_cpp():
+    if util.is_64bit():
+        from . import cpplib64 as cpplib
+    else:
+        from . import cpplib32 as cpplib
+    return cpplib

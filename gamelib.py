@@ -43,9 +43,10 @@ class EncryptedData(bytes):
 
 if not CRYPTOGRAPHY_DISABLED:
     class DataCryptor(Fernet):
-        def __init__(self,__key=None):super().__init__(__key if __key is not None else DataCryptor.generate_key())
-        #def __lshift__(self,string):return b'ENC!'+self.encrypt(string)
-        #def __rshift__(self,crypted):return self.decrypt(crypted.partition(b'ENC!')[2])
+        def __init__(self, key=None):
+            if key is None: key = DataCryptor.generate_key()
+            self.key = key
+            super().__init__(self.key)
         def __lshift__(self, data):
             if isinstance(data, EncryptedData):
                 return self.decrypt(data.get().partition(b'ENC!')[2])

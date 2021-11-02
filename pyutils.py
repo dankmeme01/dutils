@@ -1,5 +1,4 @@
 from functools import wraps, partial
-from itertools import groupby, zip_longest
 from inspect import getfullargspec
 from threading import Timer, Lock, Thread
 from datetime import datetime
@@ -7,7 +6,6 @@ from socket import socket
 from pathlib import Path
 from typing import Any, Union
 from enum import Enum, auto
-from random import choice
 from string import ascii_letters
 import asyncio
 import json
@@ -76,6 +74,7 @@ def multi_thread_deco(threads: int):
     return deco
 
 def all_equal(iterable):
+    from itertools import groupby
     """ Checks if all array elements are equal"""
     g = groupby(iterable)
     return next(g, True) and not next(g, False)
@@ -104,6 +103,7 @@ def print_ret(*msg, **kwargs):
     return msg
 
 def overload(func):
+    from itertools import zip_longest
     if not func.__name__ in overloaded: overloaded[func.__name__] = []
     overloaded[func.__name__].append(func)
     def returned(func, *args, **kwargs):
@@ -126,7 +126,7 @@ def switch(var: str, **kwargs):
     for k,v in kwargs.items():
         if var == k: v()
 
-def between(string, char1, char2):
+def between(string: str, char1: str, char2: str):
     """Returns a string between first occurence of char1 and last occurence of char2 (exclusive)"""
     if not char1 in string or not char2 in string: return ValueError("One of characters is not in the string.")
     return string.partition(char1)[2].rpartition(char2)[0]
@@ -143,10 +143,14 @@ def concat(lst: list):
     return ''.join([str(x) for x in lst])
 
 def randname(length: int, extension: str = None):
+    from random import choice
     mainname = concat([choice(ascii_letters + "1234567890_-") for _ in range(length)])
     if extension: mainname += f".{extension}"
     return mainname
 
+def is_64bit():
+    from sys import maxsize
+    return maxsize > 2**32
 
 class ReusableTimer(object):
     """
