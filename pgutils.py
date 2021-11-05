@@ -1,12 +1,48 @@
 import pygame
+import pygame.freetype
 from . import pyutils
 from enum import Enum, auto
 from itertools import product
 from pygame.constants import K_BACKSPACE, K_DELETE, MOUSEBUTTONDOWN
 from pygame.locals import K_LEFT, K_RIGHT, K_ESCAPE, KEYDOWN, QUIT, K_SPACE, KEYUP
+from functools import wraps
 
+pygame.freetype.init()
 pygame.font.init()
 parsekey = {}
+states = {}
+curstate = None
+
+def change_state(new_state):
+	global curstate
+	curstate = new_state
+
+def state(state_name: str, fps: int = 60):
+	def decorator(func):
+		states[state_name] = (func, fps)
+		return None
+	return decorator
+
+def run_app(default_state: str, screensize: tuple[int, int]):
+	global curstate
+	change_state(default_state)
+	window = pygame.display.set_mode(screensize)
+	clock = pygame.time.Clock()
+	inp = PlayerInput()
+	while curstate != None:
+		gdz = states.get(curstate, None)
+		if not gdz: raise ValueError("Invalid state: '" + str(curstate) + "'")
+		events_ = pygame.event.get()
+		for e in events_:
+			if e.type == QUIT:
+				change_state(None)
+				break
+		clock.tick(gdz[1])
+		inp.tick()
+		gdz[0](window, events_, inp, pygame.mouse.get_pressed(), pygame.mouse.get_pos())
+		pygame.display.update()
+	else:
+		pygame.quit()
 
 def col_to_row(columns):
 	# convert columns to rows
@@ -45,6 +81,17 @@ def row_to_col(rows):
 	for i in range(len(rows[0])):
 		cols.append([x[i] for x in rows])
 	return cols
+
+class PositionVars:
+	def __init__(self, width: int, height: int):
+		self.props = (width, height)
+		self.LEFT = 0
+		self.RIGHT = width
+		self.TOP = 0
+		self.BOTTOM = height
+		self.HORMID = width / 2
+		self.VERMID = height / 2
+
 
 class TextEntry:
 	def __init__(self,
@@ -104,7 +151,7 @@ class TextEntry:
 
 class FontManager:
 	def __init__(self, fontpath, sysfont):
-		self.manager = pygame.font.SysFont if sysfont else pygame.font.Font
+		self.manager = pygame.freetype.SysFont if sysfont else pygame.freetype.Font
 		self.fonts = {1: self.manager(fontpath, 1)}
 		self.path = fontpath
 
@@ -219,22 +266,23 @@ class Button:
 		self.dims = dims
 		self.callback = callback
 		self.rect = None
-		self.size = font.size(text)
-		if font: self.text = font.render(text, False, textc)
+		#self.size = font.size(text)
+		if font: self.text = font.render(text, textc)
+		self.size = (self.text[1].w, self.text[1].h)
 
 	def mousebtn(self, pos):
 		if self.rect and self.rect.collidepoint(pos):
 			self.callback()
 
 	def draw(self, surface, pos):
-		if not self.dims or self.dims == "adjust": self.dims = (int(self.size[0]*1.2), int(self.size[1]*1.2))
+		if not self.dims or self.dims == "adjust": self.dims = (int(self.size[0]*1.7), int(self.size[1]*1.7))
 		surf = pygame.Surface(self.dims)
 		surf.fill(self.bgc)
 		self.rect = surface.blit(surf, (pos[0]-self.dims[0]/2, pos[1]-self.dims[1]/2))
-		textr = self.text.get_rect()
-		textr.center = (pos[0]+self.dims[0]/2, pos[1]+self.dims[1]/2)
-		textr.center = (pos[0], pos[1])
-		surface.blit(self.text, textr)
+		#textr = self.text
+		#textr.center = (pos[0]+self.dims[0]/2, pos[1]+self.dims[1]/2)
+		#textr.center = (pos[0], pos[1])
+		surface.blit(self.text[0], (pos[0]-self.dims[0]/4, pos[1]-self.dims[1]/4))
 
 class Var:
 	def __init__(self, value): self.val = value
