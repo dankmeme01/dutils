@@ -128,7 +128,7 @@ def switch(var: str, **kwargs):
 
 def between(string: str, char1: str, char2: str):
     """Returns a string between first occurence of char1 and last occurence of char2 (exclusive)"""
-    if not char1 in string or not char2 in string: return ValueError("One of characters is not in the string.")
+    if not char1 in string or not char2 in string: raise ValueError("One of characters is not in the string.")
     return string.partition(char1)[2].rpartition(char2)[0]
 
 def get_ip():
