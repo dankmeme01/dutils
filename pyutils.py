@@ -415,4 +415,14 @@ class Pathlike(type(Path())):
 class NotInstalledError(Exception):
     def __init__(self, module, name):
         message = f"Cannot use name '{name}' due to module '{module}' not being installed"
-        super.__init__(message)
+        super().__init__(message)
+
+class NotEnabledError(Exception):
+    pass
+
+class NotEnabledClass:
+    def __init__(self, string):
+        self.str = string
+
+    def __getattr__(self, attr):
+        raise NotEnabledError(self.str)
