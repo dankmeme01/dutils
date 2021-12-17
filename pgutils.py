@@ -291,6 +291,14 @@ class Var:
     def get(self): return self.val
     def set(self, value): self.val = value
 
+class Var2:
+    def __init__(self, value: None): self.val = value
+    def get(self): return self.val
+    def set(self, value): self.val = value
+    def __getattr__(self, __name: str):
+        return getattr(self.val, __name)
+    def __str__(self): return str(self.val)
+
 class ProgressBar:
     def __init__(self, dims=(200, 16), bounds=(0, 100), default=0, buttons=False, emptyc=(120,120,120), fillc=(200, 200, 200), variable=None):
         self.value = default

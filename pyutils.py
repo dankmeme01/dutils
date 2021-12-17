@@ -73,17 +73,24 @@ def multi_thread_deco(threads: int):
         return wrapper
     return deco
 
-def all_equal(iterable):
+def all_equal(iterable) -> bool:
     from itertools import groupby
     """ Checks if all array elements are equal"""
     g = groupby(iterable)
     return next(g, True) and not next(g, False)
 
-def search(string: str, start: str, end: str):
+def in_between(string: str, start: str, end: str) -> str:
     import re
     res = re.search(f"{start}(.*){end}", string)
     if not res: return res
     return res.group(1)
+
+"""
+def between(string: str, char1: str, char2: str):
+    Returns a string between first occurence of char1 and last occurence of char2 (exclusive)
+    if not char1 in string or not char2 in string: raise ValueError("One of characters is not in the string.")
+    return string.partition(char1)[2].rpartition(char2)[0]
+"""
 
 def replace_mul(string: str, strings: dict) -> str:
     for k,v in strings.items():
@@ -92,9 +99,7 @@ def replace_mul(string: str, strings: dict) -> str:
 
 def browser_open(path: str):
     import webbrowser
-    browser = webbrowser.get("C:\\Users\\User\\AppData\\Local\\Programs\\Opera GX\\73.0.3856.434\\opera.exe %s".replace("\\", "/"))
     browser = webbrowser.get('windows-default')
-    #print(type(browser))
     return browser.open(path)
 
 def print_ret(*msg, **kwargs):
@@ -125,11 +130,6 @@ def switch(var: str, **kwargs):
     # goin to be useless when py3.10
     for k,v in kwargs.items():
         if var == k: v()
-
-def between(string: str, char1: str, char2: str):
-    """Returns a string between first occurence of char1 and last occurence of char2 (exclusive)"""
-    if not char1 in string or not char2 in string: raise ValueError("One of characters is not in the string.")
-    return string.partition(char1)[2].rpartition(char2)[0]
 
 def get_ip():
     """Returns a list with 2 elements: local ip and public ip"""
