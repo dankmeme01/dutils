@@ -181,79 +181,79 @@
     },
     {
         "name": "{tara-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "tara"
     },
     {
         "name": "{gene-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "gene"
     },
     {
         "name": "{max-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "max"
     },
     {
         "name": "{mrp-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "mrp"
     },
     {
         "name": "{sprout-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "sprout"
     },
     {
         "name": "{byron-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "byron"
     },
     {
         "name": "{squeak-name}",
-        "rarity": 6,
+        "rarity": 5,
         "season": 0,
         "imgc": "squeak"
     },
     {
         "name": "{spike-name}",
-        "rarity": 7,
+        "rarity": 6,
         "season": 0,
         "imgc": "spike"
     },
     {
         "name": "{crow-name}",
-        "rarity": 7,
+        "rarity": 6,
         "season": 0,
         "imgc": "crow"
     },
     {
         "name": "{leon-name}",
-        "rarity": 7,
+        "rarity": 6,
         "season": 0,
         "imgc": "leon"
     },
     {
         "name": "{sandy-name}",
-        "rarity": 7,
+        "rarity": 6,
         "season": 0,
         "imgc": "sandy"
     },
     {
         "name": "{amber-name}",
-        "rarity": 7,
+        "rarity": 6,
         "season": 0,
         "imgc": "amber"
     },
     {
         "name": "{mag-name}",
-        "rarity": 7,
+        "rarity": 6,
         "season": 0,
         "imgc": "mag"
     },

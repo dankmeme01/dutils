@@ -56,5 +56,3 @@ def parse_str_fun(string: str, func) -> str:
 
 def parse_str(string: str, loc_manager: LocalizationManager = None, locale_code: str = None):
     return parse_str_fun(string, lambda key: loc_manager.get(key).get(locale_code))
-
-del re

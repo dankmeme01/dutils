@@ -1,5 +1,5 @@
 from pathlib import Path
-from enum import Enum
+from enum import Enum, auto
 from dataclasses import dataclass, field as dc_field
 from . import locstrings
 from datetime import datetime
@@ -13,12 +13,17 @@ class Rarity(Enum):
     LEGENDARY = 6
 
     CHROMA = 7
-    CHROMA_EPIC = 4
-    CHROMA_MYTHIC = 5
-    CHROMA_LEGENDARY = 6
+    CHROMA_EPIC = 14
+    CHROMA_MYTHIC = 15
+    CHROMA_LEGENDARY = 16
 
     def __repr__(self):
         return '<%s.%s>' % (self.__class__.__name__, self.name)
+
+class BrawlerQuery(Enum):
+    NAME = auto()
+    RARITY = auto()
+    SEASON = auto()
 
 @dataclass
 class Brawler:
@@ -29,7 +34,7 @@ class Brawler:
     like_path: Path = dc_field(repr=False)
 
 def adjust_chroma(cur_season: int, season_added: int, rarity: Rarity) -> Rarity:
-    if rarity != Rarity.CHROMA:
+    if season_added == 0:
         return rarity
 
     diff = cur_season - season_added
@@ -42,5 +47,5 @@ def adjust_chroma(cur_season: int, season_added: int, rarity: Rarity) -> Rarity:
         case _:
             return Rarity.CHROMA_EPIC
 
-def calc_season(date: datetime.datetime = datetime.datetime.now()):
+def calc_season(date: datetime = datetime.now()):
     return 9 # TODO
