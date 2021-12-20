@@ -6,7 +6,10 @@ from .classes.boxes import *
 from .classes.server import *
 from difflib import SequenceMatcher
 from pathlib import Path
-import simplejson as json
+try:
+    import simplejson as json
+except ModuleNotFoundError:
+    import json
 
 __initialized__ = [False, False]
 __init_data__ = None
