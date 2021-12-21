@@ -1,6 +1,6 @@
 import pygame
 import pygame.freetype
-from . import pyutils
+from . import util
 from enum import Enum, auto
 from itertools import product
 from pygame.constants import K_BACKSPACE, K_DELETE, MOUSEBUTTONDOWN
@@ -46,7 +46,7 @@ def run_app(default_state: str, screensize: tuple[int, int]):
 
 def col_to_row(columns):
     # convert columns to rows
-    if not pyutils.all_equal([len(x) for x in columns]):
+    if not util.all_equal([len(x) for x in columns]):
         # gotta fill em up
         longest = sorted([len(x) for x in columns])[-1]
         ind = 0
@@ -68,7 +68,7 @@ def col_to_row(columns):
 def row_to_col(rows):
     if len(rows) == 0: return []
     #back baby
-    if not pyutils.all_equal([len(x) for x in rows]):
+    if not util.all_equal([len(x) for x in rows]):
         # gotta fill em up
         longest = sorted([len(x) for x in rows])[-1]
         ind = 0

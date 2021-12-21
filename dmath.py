@@ -1,11 +1,11 @@
 import math
 from fractions import Fraction
 try:
-    from . import pyutils
+    from . import util
 except Exception:
-    import pyutils
+    import util
 finally:
-    whole, beautify, overload = pyutils.whole, pyutils.beautify, pyutils.overload
+    whole, beautify, overload = util.whole, util.beautify, util.overload
 
 def sin(deg: float): return math.sin(math.radians(deg))
 def cos(deg: float): return math.cos(math.radians(deg))
@@ -105,8 +105,8 @@ def quadform(formula: str) -> list[int or float]:
     equation = equation.partition("=")[0].replace("^","**")
     a = equation.partition("x")[0]
     if len(equation.partition("x")) != 3 or equation.partition("x")[0] == "":
-    	a = "1"
-    	equation = "1"+equation
+        a = "1"
+        equation = "1"+equation
     if a[0] == "-" and float(a)> 0: a = str(float(-a))
     if a == "0": raise ValueError("Incorrect equation, a cannot be zero")
     # remove parts of a

@@ -21,7 +21,7 @@ on_shutdown - (manager)
 raw_data - (manager, player, data)
 """
 from . import event as evt
-from .pyutils import NotInstalledError
+from .util import NotInstalledError
 import selectors
 import socket
 import types

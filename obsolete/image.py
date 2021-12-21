@@ -1,5 +1,5 @@
 from pathlib import Path
-from ..pyutils import Pathlike, randname, NotInstalledError
+from ..util import Pathlike, randname, NotInstalledError
 from PIL import Image as PImage
 
 def asave(image: PImage.Image, path: Pathlike):
