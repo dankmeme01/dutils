@@ -27,6 +27,7 @@ class Types(Enum):
     ENUM =       auto()
     SET =        auto()
     BOOLEAN =    auto()
+    JSON =       auto()
 
 class Constraints(Enum):
     NOT_NULL = 0b00001
@@ -64,20 +65,20 @@ class Schema:
     def __init__(self, table_name: str):
         self.name = table_name
         self.columns: list[Column] = []
-        self.foreigns: list[Column] = []
+        self.foreigns: list[str] = []
         self.primary: Column = None
 
     def add(self, name: str, type_: Types, constraints: list[Constraints] = [], size=None, default=None):
         self.columns.append(Column(name, type_, constraints, size, default))
         return self
 
-    def add_foreign(self, name: str, type_: Types, ref_table_name: str, ref_table_col: str, constraints: list[Constraints] = []):
-        self.columns.append(Column(name, type_, constraints))
+    def add_foreign(self, name: str, type_: Types, ref_table_name: str, ref_table_col: str, size=None):
+        self.columns.append(Column(name, type_, [], size))
         self.foreigns.append(f"FOREIGN KEY({name}) REFERENCES {ref_table_name}({ref_table_col})")
         return self
 
     def set_primary(self, name: str, type_: Types, constraints: list[Constraints] = [], size=None, autoincrement=False):
-        self.add(name, type_, constraints + [Constraints.PRIMARY_KEY] + ([Constraints.AUTO_INCREMENT] if autoincrement else []), size=None)
+        self.add(name, type_, constraints + [Constraints.PRIMARY_KEY] + ([Constraints.AUTO_INCREMENT] if autoincrement else []), size)
         return self
 
     def __str__(self):
