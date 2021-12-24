@@ -36,11 +36,12 @@ class Constraints(Enum):
     PRIMARY_KEY = 0b10000
 
 class Column:
-    def __init__(self, name: str, type: Types, constraints: list[Constraints] = [], size=None):
+    def __init__(self, name: str, type: Types, constraints: list[Constraints] = [], size=None, default=None):
         self.name = name
         self.type = type
         self.constraints = constraints
         self.size = size
+        self.default = default
 
     def __str__(self):
         if not self.constraints:
@@ -48,7 +49,16 @@ class Column:
         else:
             cstr = " " + " ".join([x.name.replace("_", " ") for x in self.constraints])
         typestr = self.type.name if not self.size else f"{self.type.name}({self.size})"
-        return f"{self.name} {typestr}{cstr}"
+        if self.default is None:
+            return f"{self.name} {typestr}{cstr}"
+        else:
+            if isinstance(self.default, str):
+                ttdef = f'"{self.default}"'
+            elif isinstance(self.default, bool):
+                ttdef = str(self.default).upper()
+            else:
+                ttdef = str(self.default)
+            return f"{self.name} {typestr}{cstr} DEFAULT {ttdef}"
 
 class Schema:
     def __init__(self, table_name: str):
@@ -57,8 +67,8 @@ class Schema:
         self.foreigns: list[Column] = []
         self.primary: Column = None
 
-    def add(self, name: str, type_: Types, constraints: list[Constraints] = [], size=None):
-        self.columns.append(Column(name, type_, constraints, size))
+    def add(self, name: str, type_: Types, constraints: list[Constraints] = [], size=None, default=None):
+        self.columns.append(Column(name, type_, constraints, size, default))
         return self
 
     def add_foreign(self, name: str, type_: Types, ref_table_name: str, ref_table_col: str, constraints: list[Constraints] = []):
@@ -66,8 +76,8 @@ class Schema:
         self.foreigns.append(f"FOREIGN KEY({name}) REFERENCES {ref_table_name}({ref_table_col})")
         return self
 
-    def set_primary(self, name: str, type_: Types, constraints: list[Constraints] = [], size=None):
-        self.add(name, type_, constraints + [Constraints.PRIMARY_KEY], size=None)
+    def set_primary(self, name: str, type_: Types, constraints: list[Constraints] = [], size=None, autoincrement=False):
+        self.add(name, type_, constraints + [Constraints.PRIMARY_KEY] + ([Constraints.AUTO_INCREMENT] if autoincrement else []), size=None)
         return self
 
     def __str__(self):
