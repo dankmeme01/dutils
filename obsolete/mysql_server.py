@@ -51,7 +51,7 @@ class Column:
             cstr = " " + " ".join([x.name.replace("_", " ") for x in self.constraints])
         typestr = self.type.name if not self.size else f"{self.type.name}({self.size})"
         if self.default is None:
-            return f"{self.name} {typestr}{cstr}"
+            return f"`{self.name}` {typestr}{cstr}"
         else:
             if isinstance(self.default, str):
                 ttdef = f'"{self.default}"'
@@ -59,7 +59,7 @@ class Column:
                 ttdef = str(self.default).upper()
             else:
                 ttdef = str(self.default)
-            return f"{self.name} {typestr}{cstr} DEFAULT {ttdef}"
+            return f"`{self.name}` {typestr}{cstr} DEFAULT {ttdef}"
 
 class Schema:
     def __init__(self, table_name: str):
@@ -131,9 +131,18 @@ class Server:
                 raise e
 
     def add_table(self, schema: Schema):
-        self.execute_query(str(schema))
+        try:
+            self.execute_query(str(schema))
+        except mysql.connector.Error as e:
+            print(f"Error: {e}. Table schema:")
+            print(schema)
 
     def insert(self, table_name: str, **kwargs):
         # confusing but i never cared
         self.execute_query(f"""INSERT INTO {table_name} ({', '.join(list(kwargs.keys()))})
         VALUES ({', '.join([f'"{x}"' if isinstance(x, str) else str(x) for x in list(kwargs.values())])})""")
+
+    def update(self, table_name: str, where_cond: str, **kwargs):
+        self.execute_query(f"""UPDATE {table_name} SET
+        {', '.join([f'`{k}` = ' + (f"'{v}'" if isinstance(v, str) else str(v)) for k,v in kwargs.items()])}
+        WHERE {where_cond}""")
