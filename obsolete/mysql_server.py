@@ -146,3 +146,25 @@ class Server:
         self.execute_query(f"""UPDATE {table_name} SET
         {', '.join([f'`{k}` = ' + (f"'{v}'" if isinstance(v, str) else str(v)) for k,v in kwargs.items()])}
         WHERE {where_cond}""")
+
+    def select(self, table_name: str, *columns, where_cond: str=None, limit: int=None, results=False):
+        if not columns:
+            colexp = "*"
+        else:
+            colexp = f"({', '.join(columns)})"
+
+        if not where_cond:
+            whexp = ""
+        else:
+            whexp = f"WHERE {where_cond}"
+
+        if not limit:
+            limexp = ""
+        else:
+            limexp = f"LIMIT {limit}"
+
+        q = f"SELECT {colexp} FROM {table_name} {whexp} {limexp}"
+        return self.execute_query(q, results)
+
+    def drop(self, table_name: str):
+        self.execute_query(f"DROP TABLE {table_name}")
