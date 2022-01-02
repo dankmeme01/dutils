@@ -1,5 +1,4 @@
 import mysql.connector
-import time, random
 from enum import Enum, auto
 
 class Types(Enum):
