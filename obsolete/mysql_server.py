@@ -139,7 +139,7 @@ class Server:
     def insert(self, table_name: str, **kwargs):
         # confusing but i never cared
         self.execute_query(f"""INSERT INTO {table_name} ({', '.join(list(kwargs.keys()))})
-        VALUES ({', '.join([f'"{x}"' if isinstance(x, str) else str(x) for x in list(kwargs.values())])})""")
+        VALUES ({', '.join([f'"{x}"' if isinstance(x, str) and x != "NOW()" else str(x) for x in list(kwargs.values())])})""")
 
     def update(self, table_name: str, where_cond: str, **kwargs):
         self.execute_query(f"""UPDATE {table_name} SET
