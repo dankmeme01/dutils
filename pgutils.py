@@ -192,15 +192,17 @@ class Table:
         for i in self.cols:
             longest_ = ["", 0]
             for j in i:
-                s = self.font.size(j)
+                rect = self.font.get_rect(j)
+                s = [rect.w, rect.h]
                 if s[0] > longest_[1]: longest_ = [j, s[0]]
             total += longest_[0]
         for i in self.rows:
-            size = self.font.size(total)
+            rect = self.font.get_rect(j)
+            size = [rect.w, rect.h]
             size = (size[0]+len(i)*20, size[1])
             if size[0] > longest[0]: longest = size
         k = 0.33
-        return longest[0],(longest[1]+self.font.get_height()*k) * len(self.rows) +self.font.get_height()/4
+        return longest[0],(longest[1]+self.font.height*k) * len(self.rows) +self.font.height/4
 
     def draw(self, centpos, surf, nobox=False):
         size = self._calcsize()
@@ -211,16 +213,18 @@ class Table:
             i = self.cols[index]
             longest = 0
             for j in i:
-                s = self.font.size(j)
+                rect = self.font.get_rect(j)
+                s = [rect.w, rect.h]
                 if s[0] > longest: longest = s[0]
             startpos += longest+20
             #if index == 0: pygame.draw.line(surf, self.ltext, (startpos-longest-20, top), (startpos-longest-20, bottom-1))
             if index != len(self.cols)-1: pygame.draw.line(surf, self.ltext, (startpos, top), (startpos, bottom-1))
             slot = 0
             for j in i:
-                text = self.font.render(j, False, self.ltext)
+                text, rect = self.font.render(j, False, self.ltext)
+                rect.center=(startpos-longest/2-10, top+self.font.height/1.25+slot*size[1]/len(self.rows))
                 #surf.blit(text, text.get_rect(center=(startpos-longest/2-10, top+self.font.get_height()/1.25+slot*self.font.get_height())))
-                surf.blit(text, text.get_rect(center=(startpos-longest/2-10, top+self.font.get_height()/1.25+slot*size[1]/len(self.rows))))
+                surf.blit(text, rect)
                 slot += 1
         p1 = (int(centpos[0]-size[0]/k), int(centpos[1]-size[1]/k))
         #p2 = (int(centpos[0]+size[0]/k), int(centpos[1]-size[1]/k))
