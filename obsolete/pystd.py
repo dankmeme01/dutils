@@ -5,7 +5,7 @@
 # that could be useful for you.
 # NOTE: literals are not this type by default. If you type [], {}, 1 or "a",
 # they will be the original types. To fix that, either type list([]), dict({}), int(1), str("a")
-# OR use fixtype()
+# OR use FT % [] | FT([])
 
 import builtins as _py
 from typing import Any, Union
@@ -59,7 +59,6 @@ class dict(_py.dict):
         else:
             return toreturn
 
-
 class float(_py.float):
     def to_python(self) -> _py.float:
         return _py.float(self)
@@ -77,25 +76,46 @@ class str(_py.str):
 
     def censor(self, char='*'):
         string = char * self.__len__()
-        return string
+        return FT % string
 
     def size(self):
         return len(self)
 
-def fixtype(val):
-    if isinstance(val, _py.list):
-        return list(val)
-    elif isinstance(val, _py.dict):
-        return dict(val)
-    elif isinstance(val, _py.float):
-        return float(val)
-    elif isinstance(val, _py.str):
-        return str(val)
+    def before_first(self, char):
+        return FT % self.partition(char)[0]
 
-FT = fixtype
+    def before_last(self, char):
+        return FT % self.rpartition(char)[0]
+
+    def after_first(self, char):
+        return FT % self.partition(char)[2]
+
+    def after_last(self, char):
+        return FT % self.rpartition(char)[2]
+
+
+class StdTypeFixer:
+    def fix(val):
+        if isinstance(val, _py.list):
+            return list(val)
+        elif isinstance(val, _py.dict):
+            return dict(val)
+        elif isinstance(val, _py.float):
+            return float(val)
+        elif isinstance(val, _py.str):
+            return str(val)
+
+    def __mod__(self, val):
+        return type(self).fix(val)
+
+    def __call__(self, val):
+        return type(self).fix(val)
+
+FT = StdTypeFixer()
 
 if __name__ == '__main__':
     # test
-    d = FT({1: 3, 2: 4})
-    df = d.to_python()
-    print(type(d), type(df))
+    d = {1: 3, 2: 4}
+    print(type(d),
+    type(FT(d)),
+    type(FT % d))

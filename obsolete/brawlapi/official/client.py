@@ -27,6 +27,26 @@ class Client(BaseClient):
         r = self._get(Endpoints.PLAYER % tag)
         return Player.from_json(r)
 
+    def get_club_members(self, clubtag: str) -> list[ClubMember]:
+        tag = self._check_tag(clubtag)
+        r = self._get(Endpoints.CLUB_MEMBERS % tag)
+        members = r['items']
+        return [ClubMember.from_json(c) for c in members]
+
+    def get_club(self, clubtag: str) -> Club:
+        tag = self._check_tag(clubtag)
+        r = self._get(Endpoints.CLUB % tag)
+        return Club.from_json(r)
+
+    def get_brawlers(self) -> list[Brawler]:
+        r = self._get(Endpoints.BRAWLERS)
+        brawlers = r['items']
+        return [Brawler.from_json(b) for b in brawlers]
+
+    def get_brawler(self, brawlerid: int) -> Brawler:
+        r = self._get(Endpoints.BRAWLER % brawlerid)
+        return Brawler.from_json(r)
+
     def get_event_rotation(self) -> Event:
         r = self._get(Endpoints.EVENTS)
-        return Event.from_json(r)
+        return [Event.from_json(e) for e in r]

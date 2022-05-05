@@ -39,7 +39,7 @@ class GameResult(Enum):
 @dataclass
 class Event:
     mode: Optional[str]
-    id: int
+    id_: int
     map: Any
 
     start_time: Optional[str]
@@ -49,7 +49,7 @@ class Event:
     def from_json(cls, json: str):
         return cls(
             mode=json.get("mode", None),
-            id=json.get("id", None),
+            id_=json.get("id", None),
             map=json.get("map", None),
             start_time=json.get("startTime", None),
             end_time=json.get("endTime", None)
@@ -57,7 +57,7 @@ class Event:
 
 @dataclass
 class PersonalBrawlerData:
-    id: int
+    id_: int
     name: str
     power: int
     trophies: int
@@ -68,7 +68,7 @@ class PersonalBrawlerData:
             return None
 
         return cls(
-            id=json["id"],
+            id_=json["id"],
             name=json["name"],
             power=json["power"],
             trophies=json["trophies"]
@@ -76,7 +76,7 @@ class PersonalBrawlerData:
 
 @dataclass
 class Equippable:
-    id: int
+    id_: int
     name: str
 
     @classmethod
@@ -84,11 +84,11 @@ class Equippable:
         if json is None:
             return None
 
-        return cls(id=json['id'], name=json['name'])
+        return cls(id_=json['id'], name=json['name'])
 
 @dataclass
 class PersonalBrawler:
-    id: int
+    id_: int
     name: str
     power: int
     rank: int
@@ -105,7 +105,7 @@ class PersonalBrawler:
             return None
 
         return cls(
-            id=json['id'],
+            id_=json['id'],
             name=json['name'].lower().capitalize(),
             power=json['power'],
             rank=json['rank'],
@@ -118,7 +118,22 @@ class PersonalBrawler:
 
 @dataclass
 class Brawler:
-    pass
+    name: str
+    id_: int
+    gadgets: list[Equippable]
+    star_powers: list[Equippable]
+
+    @classmethod
+    def from_json(cls, json):
+        if json is None:
+            return None
+
+        return cls(
+            id_=json['id'],
+            name=json['name'],
+            gadgets=[Equippable.from_json(x) for x in json['gadgets']],
+            star_powers=[Equippable.from_json(x) for x in json['starPowers']]
+        )
 
 @dataclass
 class GamePlayer:
@@ -138,6 +153,53 @@ class GamePlayer:
         )
 
 Team = list[GamePlayer]
+
+@dataclass
+class ClubMember:
+    icon_id: int
+    tag: str
+    name: str
+    trophies: int
+    role: str
+    name_color: str
+
+    @classmethod
+    def from_json(cls, json):
+        return cls(
+            icon_id=json['icon']['id'],
+            tag=json['tag'],
+            name=json['name'],
+            trophies=json['trophies'],
+            role=json['role'],
+            name_color=json['nameColor']
+        )
+
+@dataclass
+class Club:
+    tag: str
+    name: str
+    description: str
+    trophies: int
+    required_trophies: int
+    type_: str
+    badge_id: int
+    members: list[ClubMember]
+
+    @classmethod
+    def from_json(cls, json):
+        if json is None:
+            return None
+
+        return cls(
+            tag=json["tag"],
+            name=json["name"],
+            description=json["description"],
+            trophies=json['trophies'],
+            required_trophies=json['requiredTrophies'],
+            type_=json['type'],
+            badge_id=json['badgeId'],
+            members=[ClubMember.from_json(x) for x in json['members']]
+        )
 
 @dataclass
 class ClubData:
